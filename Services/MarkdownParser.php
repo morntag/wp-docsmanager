@@ -148,6 +148,10 @@ class MarkdownParser {
 	 * @return array<int,array{level:int,title:string,id:string}> TOC entries.
 	 */
 	public function generate_toc( string $content ): array {
+		// Strip frontmatter to avoid YAML comments (e.g. "# comment") being parsed as headings.
+		$parsed  = $this->parse_frontmatter( $content );
+		$content = $parsed['content'];
+
 		$toc     = array();
 		$pattern = '/^(#{1,6})\s+(.+)$/m';
 
