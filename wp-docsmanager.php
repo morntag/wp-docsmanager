@@ -18,6 +18,19 @@ if ( ! defined( 'ABSPATH' ) ) {
 
 require_once __DIR__ . '/vendor/autoload.php';
 
+// Wire the WordPress auto-update checker against the public GitHub repo.
+// The repo is public, so no authentication token is used — PUC polls the
+// Releases API on the default cache window and downloads the attached ZIP.
+if ( class_exists( '\\YahnisElsts\\PluginUpdateChecker\\v5\\PucFactory' ) ) {
+	$wp_docsmanager_update_checker = \YahnisElsts\PluginUpdateChecker\v5\PucFactory::buildUpdateChecker(
+		'https://github.com/morntag/wp-docsmanager',
+		__FILE__,
+		'wp-docsmanager'
+	);
+	$wp_docsmanager_update_checker->setBranch( 'main' );
+	$wp_docsmanager_update_checker->getVcsApi()->enableReleaseAssets();
+}
+
 register_activation_hook( __FILE__, array( '\\Morntag\\WpDocsManager\\Activation', 'activate' ) );
 register_uninstall_hook( __FILE__, array( '\\Morntag\\WpDocsManager\\UninstallHandler', 'run' ) );
 

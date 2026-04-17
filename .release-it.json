@@ -22,6 +22,6 @@
     }
   },
   "hooks": {
-    "after:bump": "perl -i -pe 's/\"version\": \".*?\"/\"version\": \"'${version}'\"/' composer.json"
+    "after:bump": "perl -i -pe 's/^(\\s*\\*\\s*Version:\\s*).*/${1}'${version}'/' wp-docsmanager.php"
   }
 }

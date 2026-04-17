@@ -64,6 +64,7 @@ jobs:
         run: npm ci
 
       - name: Run release-it
+        id: release-it
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
@@ -72,6 +73,7 @@ jobs:
 
           if [ "${{ inputs.dry-run }}" = "true" ]; then
             npm run release:dry -- --ci
+            echo "released=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
@@ -81,8 +83,11 @@ jobs:
             AFTER_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
             if [ "$BEFORE_TAG" = "$AFTER_TAG" ]; then
               echo "No new tag was created - nothing to release."
+              echo "released=false" >> "$GITHUB_OUTPUT"
             else
               echo "Released $BEFORE_TAG -> $AFTER_TAG"
+              echo "released=true" >> "$GITHUB_OUTPUT"
+              echo "tag=$AFTER_TAG" >> "$GITHUB_OUTPUT"
             fi
           else
             STATUS=$?
@@ -92,8 +97,38 @@ jobs:
             AFTER_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "none")
             if [ "$BEFORE_TAG" = "$AFTER_TAG" ]; then
               echo "release-it exited $STATUS but no new tag - treating as no-op."
+              echo "released=false" >> "$GITHUB_OUTPUT"
               exit 0
             fi
             echo "release-it failed with status $STATUS after creating tag $AFTER_TAG"
             exit $STATUS
           fi
+
+      - name: Package release ZIP
+        if: steps.release-it.outputs.released == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Pull the freshly-bumped version directly from the plugin header so
+          # the ZIP filename always matches the tag release-it just created.
+          VERSION=$(grep -E '^\s*\*\s*Version:' wp-docsmanager.php | head -1 | sed -E 's/.*Version:\s*//' | tr -d '[:space:]')
+          echo "Packaging wp-docsmanager v${VERSION}"
+
+          # Production-only vendor/ so the ZIP does not ship dev tooling.
+          composer install --no-dev --optimize-autoloader
+
+          # Stage into a sibling dir named wp-docsmanager/ so the ZIP has a
+          # single top-level folder matching the plugin slug.
+          STAGING_PARENT=$(mktemp -d)
+          STAGING="${STAGING_PARENT}/wp-docsmanager"
+          mkdir -p "$STAGING"
+          rsync -a --exclude-from=.zipexclude ./ "$STAGING/"
+
+          # Build the ZIP in the repo root.
+          ZIP="wp-docsmanager-v${VERSION}.zip"
+          (cd "$STAGING_PARENT" && zip -r "${GITHUB_WORKSPACE}/${ZIP}" wp-docsmanager)
+
+          # Attach to the GitHub release release-it just created.
+          gh release upload "v${VERSION}" "$ZIP" --clobber

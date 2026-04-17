@@ -51,4 +51,26 @@ class ComposerJsonTest extends TestCase {
 			'symfony/dotenv must be removed — the standalone plugin does not read .env files.'
 		);
 	}
+
+	/**
+	 * Phase 3 AC #1: plugin-update-checker must be a runtime dependency so the
+	 * shipped ZIP includes it under vendor/ and sites can auto-update against
+	 * the public GitHub Releases feed.
+	 */
+	public function test_plugin_update_checker_is_required(): void {
+		$require = $this->composer['require'] ?? array();
+		$this->assertIsArray( $require );
+		$this->assertArrayHasKey(
+			'yahnis-elsts/plugin-update-checker',
+			$require,
+			'yahnis-elsts/plugin-update-checker must be required (^5.0) for the update-checker wiring in Phase 3.'
+		);
+
+		$constraint = (string) $require['yahnis-elsts/plugin-update-checker'];
+		$this->assertMatchesRegularExpression(
+			'/(\^|>=)5(\.\d+)*/',
+			$constraint,
+			"yahnis-elsts/plugin-update-checker constraint '{$constraint}' must allow ^5.0 (e.g. '^5.0', '^5.5', or '>=5.0')."
+		);
+	}
 }

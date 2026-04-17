@@ -60,7 +60,7 @@ Only `feat` and `fix` commits trigger a release. `chore`, `docs`, `style`, `wip`
 
 Manual dry-run: trigger the workflow via GitHub Actions UI with the dry-run checkbox, or locally with `npm run release:dry`.
 
-> **Note (2026-04-17):** Phase 3 of the standalone-plugin conversion (`plans/standalone-plugin-conversion.md`) wires up the ZIP build step, the PUC update checker, and the plugin-header bumping. Until Phase 3 lands, the workflow only does the test gate + release-it tag/release without a ZIP asset.
+Sites receive updates via [yahnis-elsts/plugin-update-checker](https://github.com/YahnisElsts/plugin-update-checker) (PUC v5), wired in `wp-docsmanager.php` against the public GitHub repo with `enableReleaseAssets()`. Exclusions for the shipped ZIP live in `.zipexclude` (rsync-style patterns).
 
 ## Architecture
 
