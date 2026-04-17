@@ -94,7 +94,7 @@ abstract class Module {
 		foreach ( $this->hooks as $hook => $config ) {
 			// Case 1: Simple format -> 'hook' => 'method'.
 			if ( is_string( $config ) ) {
-				add_action( $hook, array( $this, $config ) ); // @phpstan-ignore argument.type
+				add_action( $hook, array( $this, $config ) );
 				continue;
 			}
 
@@ -119,7 +119,7 @@ abstract class Module {
 
 				add_action(
 					$hook,
-					array( $this, $method ), // @phpstan-ignore argument.type
+					array( $this, $method ),
 					$priority,
 					$accepted_args
 				);
@@ -146,7 +146,7 @@ abstract class Module {
 
 			add_filter(
 				$filter,
-				array( $this, $method ), // @phpstan-ignore argument.type
+				array( $this, $method ),
 				$priority,
 				$accepted_args
 			);
@@ -160,8 +160,6 @@ abstract class Module {
 
 	/**
 	 * Prevents unserializing of singleton.
-	 *
-	 * @phpstan-ignore-next-line method.unused - Intentionally unused for singleton pattern
 	 */
-	private function __wakeup() {}
+	public function __wakeup() {}
 }

@@ -1,0 +1,38 @@
+commit-msg:
+  commands:
+    commitlint:
+      run: npx --no -- commitlint --edit {1}
+
+pre-commit:
+  commands:
+    php-code-style:
+      glob: "**/*.php"
+      run: |
+        # Run PHPCBF auto-fix on staged files, then re-stage
+        vendor/bin/phpcbf --standard=phpcs.xml {staged_files} || true
+        git add {staged_files}
+        # Run PHPCS validation
+        vendor/bin/phpcs --standard=phpcs.xml {staged_files}
+    js-code-style:
+      glob: "assets/src/**/*.js"
+      run: |
+        # Run Biome auto-fix on staged files, then re-stage
+        npx @biomejs/biome check --write {staged_files} || true
+        git add {staged_files}
+        # Run Biome validation
+        npx @biomejs/biome check {staged_files}
+
+pre-push:
+  commands:
+    branch-naming:
+      run: |
+        branch=$(git rev-parse --abbrev-ref HEAD)
+        if [ "$branch" = "main" ] || [ "$branch" = "dev" ]; then
+          exit 0
+        fi
+        if ! echo "$branch" | grep -qE '^(feature|bugfix|hotfix)/[a-z0-9][a-z0-9-]*[a-z0-9]$'; then
+          echo "Branch name '$branch' does not follow naming convention."
+          echo "Must match: feature/*, bugfix/*, or hotfix/*"
+          echo "Use lowercase, hyphens only, no trailing/double hyphens."
+          exit 1
+        fi

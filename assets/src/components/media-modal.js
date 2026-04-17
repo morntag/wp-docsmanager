@@ -16,7 +16,7 @@ function parseVideoUrl(url) {
 
 	// YouTube: youtube.com/watch?v=ID or youtu.be/ID
 	let match = url.match(
-		/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/
+		/(?:youtube\.com\/watch\?v=|youtu\.be\/)([a-zA-Z0-9_-]{11})/,
 	);
 	if (match) {
 		return {
@@ -89,18 +89,25 @@ function createModal(title, mediaType) {
 	linkContent.dataset.tab = 'link';
 	linkContent.style.display = 'none';
 
-	const placeholder = mediaType === 'image' ? 'https://example.com/image.jpg' : 'https://www.youtube.com/watch?v=...';
+	const placeholder =
+		mediaType === 'image'
+			? 'https://example.com/image.jpg'
+			: 'https://www.youtube.com/watch?v=...';
 	linkContent.innerHTML = `
 		<div class="mcc-media-modal-field">
 			<label>URL</label>
 			<input type="url" class="mcc-media-modal-url" placeholder="${placeholder}" />
 		</div>
-		${mediaType === 'image' ? `
+		${
+			mediaType === 'image'
+				? `
 		<div class="mcc-media-modal-field">
 			<label>Alt Text</label>
 			<input type="text" class="mcc-media-modal-alt" placeholder="Describe the image" />
 		</div>
-		` : ''}
+		`
+				: ''
+		}
 		<div class="mcc-media-modal-preview"></div>
 		<button type="button" class="button button-primary mcc-media-modal-insert-btn" disabled>
 			Insert
@@ -114,7 +121,9 @@ function createModal(title, mediaType) {
 	tabs.addEventListener('click', (e) => {
 		const tab = e.target.closest('.mcc-media-modal-tab');
 		if (!tab) return;
-		tabs.querySelectorAll('.mcc-media-modal-tab').forEach((t) => t.classList.remove('is-active'));
+		tabs
+			.querySelectorAll('.mcc-media-modal-tab')
+			.forEach((t) => t.classList.remove('is-active'));
 		tab.classList.add('is-active');
 		modal.querySelectorAll('.mcc-media-modal-content').forEach((c) => {
 			c.style.display = c.dataset.tab === tab.dataset.tab ? '' : 'none';
@@ -123,7 +132,9 @@ function createModal(title, mediaType) {
 
 	// Close modal
 	const close = () => overlay.remove();
-	header.querySelector('.mcc-media-modal-close').addEventListener('click', close);
+	header
+		.querySelector('.mcc-media-modal-close')
+		.addEventListener('click', close);
 	overlay.addEventListener('click', (e) => {
 		if (e.target === overlay) close();
 	});
@@ -182,7 +193,11 @@ export function openImageModal(editor) {
 			});
 			frame.on('select', () => {
 				const attachment = frame.state().get('selection').first().toJSON();
-				editor.chain().focus().setImage({ src: attachment.url, alt: attachment.alt || '' }).run();
+				editor
+					.chain()
+					.focus()
+					.setImage({ src: attachment.url, alt: attachment.alt || '' })
+					.run();
 				overlay.remove();
 			});
 			frame.open();
@@ -217,7 +232,8 @@ export function openVideoModal(editor) {
 				}
 				insertBtn.disabled = false;
 			} else if (url) {
-				preview.innerHTML = '<p style="color:#999;">Paste a YouTube, Vimeo, or direct video URL (.mp4, .webm, .ogg)</p>';
+				preview.innerHTML =
+					'<p style="color:#999;">Paste a YouTube, Vimeo, or direct video URL (.mp4, .webm, .ogg)</p>';
 				insertBtn.disabled = true;
 			} else {
 				preview.innerHTML = '';

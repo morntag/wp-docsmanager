@@ -1,0 +1,15 @@
+parameters:
+	level: 6
+	paths:
+		- DocsManager.php
+		- Module.php
+		- Models
+		- Services
+	excludePaths:
+		analyseAndScan:
+			- vendor
+			- node_modules (?)
+			- assets
+			- views
+	bootstrapFiles:
+		- phpstan-bootstrap.php

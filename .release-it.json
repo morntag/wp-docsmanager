@@ -1,0 +1,27 @@
+{
+  "git": {
+    "commitMessage": "chore(release): v${version}",
+    "tagName": "v${version}",
+    "requireBranch": "main",
+    "requireCommits": true,
+    "requireCommitsFail": false,
+    "push": true
+  },
+  "npm": false,
+  "github": {
+    "release": true
+  },
+  "plugins": {
+    "@release-it/conventional-changelog": {
+      "preset": {
+        "name": "conventionalcommits",
+        "bumpStrict": true
+      },
+      "infile": "CHANGELOG.md",
+      "header": "# Changelog\n\nAll notable changes to this project will be documented in this file.\n"
+    }
+  },
+  "hooks": {
+    "after:bump": "perl -i -pe 's/\"version\": \".*?\"/\"version\": \"'${version}'\"/' composer.json"
+  }
+}

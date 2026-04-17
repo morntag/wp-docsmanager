@@ -23,7 +23,9 @@ async function fetchDocs() {
 	}
 
 	const ajaxUrl =
-		typeof morntagDocs !== 'undefined' ? morntagDocs.ajaxUrl : '/wp-admin/admin-ajax.php';
+		typeof morntagDocs !== 'undefined'
+			? morntagDocs.ajaxUrl
+			: '/wp-admin/admin-ajax.php';
 	const nonce = typeof morntagDocs !== 'undefined' ? morntagDocs.nonce : '';
 
 	const body = new URLSearchParams({
@@ -52,7 +54,14 @@ async function fetchDocs() {
  * @param {HTMLInputElement}                     displayInput Display text input
  * @param {HTMLButtonElement}                    insertBtn   Insert button
  */
-function renderItems(container, items, filter, selection, displayInput, insertBtn) {
+function renderItems(
+	container,
+	items,
+	filter,
+	selection,
+	displayInput,
+	insertBtn,
+) {
 	container.innerHTML = '';
 
 	const visible = filter
@@ -110,14 +119,21 @@ function renderItems(container, items, filter, selection, displayInput, insertBt
  * @param {HTMLInputElement} displayInput Display text input
  * @param {HTMLButtonElement} insertBtn  Insert button
  */
-function rebuildLists(allDocs, listWrap, filter, selection, displayInput, insertBtn) {
+function rebuildLists(
+	allDocs,
+	listWrap,
+	filter,
+	selection,
+	displayInput,
+	insertBtn,
+) {
 	renderItems(
 		listWrap.querySelector('[data-section="module"]'),
 		allDocs.module,
 		filter,
 		selection,
 		displayInput,
-		insertBtn
+		insertBtn,
 	);
 	renderItems(
 		listWrap.querySelector('[data-section="docs"]'),
@@ -125,7 +141,7 @@ function rebuildLists(allDocs, listWrap, filter, selection, displayInput, insert
 		filter,
 		selection,
 		displayInput,
-		insertBtn
+		insertBtn,
 	);
 	renderItems(
 		listWrap.querySelector('[data-section="custom"]'),
@@ -133,7 +149,7 @@ function rebuildLists(allDocs, listWrap, filter, selection, displayInput, insert
 		filter,
 		selection,
 		displayInput,
-		insertBtn
+		insertBtn,
 	);
 }
 
@@ -232,7 +248,9 @@ export function openDocPickerModal(editor) {
 	// Wire up close
 	// -----------------------------------------------------------------------
 	const close = () => overlay.remove();
-	header.querySelector('.mcc-media-modal-close').addEventListener('click', close);
+	header
+		.querySelector('.mcc-media-modal-close')
+		.addEventListener('click', close);
 	overlay.addEventListener('click', (e) => {
 		if (e.target === overlay) close();
 	});
@@ -243,9 +261,9 @@ export function openDocPickerModal(editor) {
 	tabs.addEventListener('click', (e) => {
 		const tab = e.target.closest('.mcc-media-modal-tab');
 		if (!tab) return;
-		tabs.querySelectorAll('.mcc-media-modal-tab').forEach((t) =>
-			t.classList.remove('is-active')
-		);
+		tabs
+			.querySelectorAll('.mcc-media-modal-tab')
+			.forEach((t) => t.classList.remove('is-active'));
 		tab.classList.add('is-active');
 		modal.querySelectorAll('.mcc-media-modal-content').forEach((c) => {
 			c.style.display = c.dataset.tab === tab.dataset.tab ? '' : 'none';
@@ -258,7 +276,9 @@ export function openDocPickerModal(editor) {
 	const searchInput = internalContent.querySelector('.mcc-doc-picker-search');
 	const listWrap = internalContent.querySelector('.mcc-doc-picker-list-wrap');
 	const loadingEl = internalContent.querySelector('.mcc-doc-picker-loading');
-	const displayInput = internalContent.querySelector('.mcc-doc-picker-display-text');
+	const displayInput = internalContent.querySelector(
+		'.mcc-doc-picker-display-text',
+	);
 	const insertBtn = internalContent.querySelector('.mcc-doc-picker-insert-btn');
 
 	// Prefill display text from selected editor text.
@@ -287,7 +307,14 @@ export function openDocPickerModal(editor) {
 
 			searchInput.addEventListener('input', () => {
 				const filter = searchInput.value.toLowerCase().trim();
-				rebuildLists(allDocs, listWrap, filter, selection, displayInput, insertBtn);
+				rebuildLists(
+					allDocs,
+					listWrap,
+					filter,
+					selection,
+					displayInput,
+					insertBtn,
+				);
 			});
 		})
 		.catch(() => {
@@ -311,8 +338,12 @@ export function openDocPickerModal(editor) {
 	// External tab wiring
 	// -----------------------------------------------------------------------
 	const extUrl = externalContent.querySelector('.mcc-doc-picker-ext-url');
-	const extDisplay = externalContent.querySelector('.mcc-doc-picker-ext-display');
-	const extInsertBtn = externalContent.querySelector('.mcc-doc-picker-ext-insert-btn');
+	const extDisplay = externalContent.querySelector(
+		'.mcc-doc-picker-ext-display',
+	);
+	const extInsertBtn = externalContent.querySelector(
+		'.mcc-doc-picker-ext-insert-btn',
+	);
 
 	// Prefill external display text too.
 	if (selectedText) {

@@ -12,7 +12,10 @@ const Iframe = Node.create({
 			height: { default: '315' },
 			frameborder: { default: '0' },
 			allowfullscreen: { default: true },
-			allow: { default: 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture' },
+			allow: {
+				default:
+					'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture',
+			},
 		};
 	},
 

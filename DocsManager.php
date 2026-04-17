@@ -1,4 +1,4 @@
-<?php // phpcs:ignoreFile
+<?php
 namespace Morntag\WpDocsManager;
 
 use Morntag\WpDocsManager\Models\Documentation;
@@ -52,10 +52,10 @@ class DocsManager extends Module {
 	private static array $pending_config = array();
 
 	protected $hooks = array(
-		'init'                    => 'register_post_types',
-		'admin_menu'              => 'add_admin_menu',
-		'admin_enqueue_scripts'   => 'enqueue_admin_assets',
-		'admin_init'              => array(
+		'init'                        => 'register_post_types',
+		'admin_menu'                  => 'add_admin_menu',
+		'admin_enqueue_scripts'       => 'enqueue_admin_assets',
+		'admin_init'                  => array(
 			array(
 				'method' => 'handle_form_submission',
 				'prio'   => 10,
@@ -618,7 +618,7 @@ class DocsManager extends Module {
 		$insert_data = array(
 			'post_author'           => get_current_user_id(),
 			'post_date'             => current_time( 'mysql' ),
-			'post_date_gmt'         => current_time( 'mysql', 1 ),
+			'post_date_gmt'         => current_time( 'mysql', true ),
 			'post_content'          => $post_data['post_content'],
 			'post_title'            => $post_data['post_title'],
 			'post_excerpt'          => '',
@@ -630,7 +630,7 @@ class DocsManager extends Module {
 			'to_ping'               => '',
 			'pinged'                => '',
 			'post_modified'         => current_time( 'mysql' ),
-			'post_modified_gmt'     => current_time( 'mysql', 1 ),
+			'post_modified_gmt'     => current_time( 'mysql', true ),
 			'post_content_filtered' => '',
 			'post_parent'           => $post_data['post_parent'],
 			'guid'                  => '',
@@ -683,7 +683,7 @@ class DocsManager extends Module {
 			'post_title'        => $post_data['post_title'],
 			'post_name'         => sanitize_title( $post_data['post_title'] ),
 			'post_modified'     => current_time( 'mysql' ),
-			'post_modified_gmt' => current_time( 'mysql', 1 ),
+			'post_modified_gmt' => current_time( 'mysql', true ),
 			'post_parent'       => $post_data['post_parent'],
 			'menu_order'        => $post_data['menu_order'],
 		);

@@ -14,19 +14,19 @@
  */
 
 import { Editor } from '@tiptap/core';
-import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
 import Table from '@tiptap/extension-table';
-import TableRow from '@tiptap/extension-table-row';
-import TableHeader from '@tiptap/extension-table-header';
 import TableCell from '@tiptap/extension-table-cell';
-import { Markdown } from 'tiptap-markdown';
+import TableHeader from '@tiptap/extension-table-header';
+import TableRow from '@tiptap/extension-table-row';
 import TextAlign from '@tiptap/extension-text-align';
+import StarterKit from '@tiptap/starter-kit';
+import { Markdown } from 'tiptap-markdown';
+import { openDocPickerModal } from './components/doc-picker-modal.js';
+import { openImageModal, openVideoModal } from './components/media-modal.js';
+import Iframe from './extensions/iframe-extension.js';
 import CustomImage from './extensions/image-extension.js';
 import Video from './extensions/video-extension.js';
-import Iframe from './extensions/iframe-extension.js';
-import { openImageModal, openVideoModal } from './components/media-modal.js';
-import { openDocPickerModal } from './components/doc-picker-modal.js';
 
 /**
  * Debounce utility
@@ -197,21 +197,24 @@ class MorntagDocsEditor {
 				icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 4v16"/><path d="M12 4v16"/><path d="M17 12l3-2v10"/></svg>',
 				command: 'heading',
 				level: 1,
-				action: () => this.editor.chain().focus().toggleHeading({ level: 1 }).run(),
+				action: () =>
+					this.editor.chain().focus().toggleHeading({ level: 1 }).run(),
 			},
 			{
 				title: 'Heading 2',
 				icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 4v16"/><path d="M12 4v16"/><path d="M21 18h-4c0-4 4-3 4-6 0-1.5-2-2.5-4-1"/></svg>',
 				command: 'heading',
 				level: 2,
-				action: () => this.editor.chain().focus().toggleHeading({ level: 2 }).run(),
+				action: () =>
+					this.editor.chain().focus().toggleHeading({ level: 2 }).run(),
 			},
 			{
 				title: 'Heading 3',
 				icon: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h8"/><path d="M4 4v16"/><path d="M12 4v16"/><path d="M17.5 10.5c1.7-1 3.5 0 3.5 1.5a2 2 0 0 1-2 2"/><path d="M17 17.5c2 1.5 4 .3 4-1.5a2 2 0 0 0-2-2"/></svg>',
 				command: 'heading',
 				level: 3,
-				action: () => this.editor.chain().focus().toggleHeading({ level: 3 }).run(),
+				action: () =>
+					this.editor.chain().focus().toggleHeading({ level: 3 }).run(),
 			},
 			{ type: 'separator' },
 			{
@@ -341,16 +344,24 @@ class MorntagDocsEditor {
 
 		const isInsideTable = this.editor.isActive('table');
 
-		const buttons = this.toolbar.querySelectorAll('.mcc-docs-editor-toolbar-btn');
+		const buttons = this.toolbar.querySelectorAll(
+			'.mcc-docs-editor-toolbar-btn',
+		);
 		buttons.forEach((btn) => {
 			const command = btn.dataset.command;
 			let isActive = false;
 
 			if (command === 'heading' && btn.dataset.level) {
-				isActive = this.editor.isActive('heading', { level: parseInt(btn.dataset.level) });
+				isActive = this.editor.isActive('heading', {
+					level: parseInt(btn.dataset.level),
+				});
 			} else if (command === 'link') {
 				isActive = this.editor.isActive('link');
-			} else if (command === 'left' || command === 'center' || command === 'right') {
+			} else if (
+				command === 'left' ||
+				command === 'center' ||
+				command === 'right'
+			) {
 				isActive = this.editor.isActive({ textAlign: command });
 			} else {
 				isActive = this.editor.isActive(command);
@@ -415,7 +426,9 @@ class MorntagDocsEditor {
 
 		const close = () => document.body.removeChild(overlay);
 
-		overlay.querySelector('.mcc-media-modal-close').addEventListener('click', close);
+		overlay
+			.querySelector('.mcc-media-modal-close')
+			.addEventListener('click', close);
 		overlay.querySelector('.mcc-table-cancel').addEventListener('click', close);
 
 		overlay.addEventListener('click', (e) => {
@@ -425,10 +438,20 @@ class MorntagDocsEditor {
 		});
 
 		overlay.querySelector('.mcc-table-insert').addEventListener('click', () => {
-			const rows = Math.max(1, parseInt(overlay.querySelector('.mcc-table-rows').value, 10) || 3);
-			const cols = Math.max(1, parseInt(overlay.querySelector('.mcc-table-cols').value, 10) || 3);
+			const rows = Math.max(
+				1,
+				parseInt(overlay.querySelector('.mcc-table-rows').value, 10) || 3,
+			);
+			const cols = Math.max(
+				1,
+				parseInt(overlay.querySelector('.mcc-table-cols').value, 10) || 3,
+			);
 			close();
-			this.editor.chain().focus().insertTable({ rows, cols, withHeaderRow: true }).run();
+			this.editor
+				.chain()
+				.focus()
+				.insertTable({ rows, cols, withHeaderRow: true })
+				.run();
 		});
 
 		document.body.appendChild(overlay);
@@ -508,7 +531,11 @@ class MorntagDocsEditor {
 		}
 
 		// Try to get from element data attribute
-		if (this.config && this.config.element && this.config.element.dataset.docId) {
+		if (
+			this.config &&
+			this.config.element &&
+			this.config.element.dataset.docId
+		) {
 			return this.config.element.dataset.docId;
 		}
 
@@ -533,13 +560,21 @@ class MorntagDocsEditor {
 }
 
 // Create singleton instance and attach to window immediately
-(function() {
+(function () {
 	const instance = new MorntagDocsEditor();
 
 	window.MorntagDocsEditor = {
-		init: function(config) { return instance.init(config); },
-		getMarkdown: function() { return instance.getMarkdown(); },
-		setMarkdown: function(content) { return instance.setMarkdown(content); },
-		destroy: function() { return instance.destroy(); }
+		init: function (config) {
+			return instance.init(config);
+		},
+		getMarkdown: function () {
+			return instance.getMarkdown();
+		},
+		setMarkdown: function (content) {
+			return instance.setMarkdown(content);
+		},
+		destroy: function () {
+			return instance.destroy();
+		},
 	};
 })();

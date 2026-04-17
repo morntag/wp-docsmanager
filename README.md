@@ -108,6 +108,17 @@ npm run build             # Bundles assets/src/editor.js → assets/js/editor.bu
 
 The compiled `assets/js/editor.bundle.js` is tracked in the repo so consumers get a ready-to-use package without running a JS toolchain.
 
+### Code quality
+
+```bash
+composer phpcs            # Lint PHP (WordPress coding standards)
+composer phpcbf           # Auto-fix violations
+composer phpstan          # Static analysis (level 6)
+composer test             # Unit tests (no WordPress bootstrap needed)
+```
+
+Rules are in `phpcs.xml` (WordPress-Extra + Core + Docs). Static analysis config is in `phpstan.neon`. Unit tests are in `tests/Unit/` with WordPress functions stubbed.
+
 ## License
 
-Proprietary — internal use.
+GPL-2.0-or-later

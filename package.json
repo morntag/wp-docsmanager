@@ -4,7 +4,9 @@
   "description": "Tiptap editor for MCC DocsManager module",
   "private": true,
   "scripts": {
-    "build": "esbuild assets/src/editor.js --bundle --minify --format=iife --outfile=assets/js/editor.bundle.js"
+    "build": "esbuild assets/src/editor.js --bundle --minify --format=iife --outfile=assets/js/editor.bundle.js",
+    "release": "release-it",
+    "release:dry": "release-it --dry-run"
   },
   "dependencies": {
     "@tiptap/core": "^2.10.5",
@@ -21,6 +23,13 @@
     "tiptap-markdown": "^0.8.10"
   },
   "devDependencies": {
-    "esbuild": "^0.24.0"
+    "@biomejs/biome": "^1.9.0",
+    "@commitlint/cli": "^19.0.0",
+    "@commitlint/config-conventional": "^19.0.0",
+    "@release-it/conventional-changelog": "^10.0.0",
+    "conventional-changelog-conventionalcommits": "^9.0.0",
+    "esbuild": "^0.24.0",
+    "lefthook": "^1.6.0",
+    "release-it": "^19.0.0"
   }
 }

@@ -1,0 +1,73 @@
+<?xml version="1.0"?>
+<ruleset xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" name="Morntag Custom PHPCS Rules">
+    <description>Morntag rules for PHP_CodeSniffer - WpDocsManager library</description>
+
+    <!-- Default scan path -->
+    <file>.</file>
+
+    <!-- Exclude vendor directory -->
+    <exclude-pattern>/vendor/*</exclude-pattern>
+
+    <!-- Exclude node_modules -->
+    <exclude-pattern>/node_modules/*</exclude-pattern>
+
+    <!-- Exclude JS files -->
+    <exclude-pattern>*.js</exclude-pattern>
+
+    <!-- Exclude assets directory -->
+    <exclude-pattern>/assets/*</exclude-pattern>
+
+    <!-- Exclude test files (PHPUnit conventions differ from WP coding standards) -->
+    <exclude-pattern>/tests/*</exclude-pattern>
+
+    <!-- Include WordPress rulesets -->
+    <rule ref="WordPress-Extra"/>
+    <rule ref="WordPress-Core"/>
+    <rule ref="WordPress-Docs"/>
+
+    <!-- Exclude specific WordPress rules -->
+    <rule ref="WordPress">
+        <exclude name="WordPress.Files.FileName"/>
+    </rule>
+
+    <!-- Ignore specific Squiz rules -->
+    <rule ref="Squiz.Commenting.FileComment.Missing">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="Squiz.Commenting.FunctionComment.Missing">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="Squiz.Commenting.VariableComment.Missing">
+        <severity>0</severity>
+    </rule>
+
+    <rule ref="Squiz.Commenting.FileComment.WrongStyle">
+        <severity>0</severity>
+    </rule>
+
+    <!-- Do not fail on warnings-only (intentional direct-DB calls in DocsManager.php) -->
+    <config name="ignore_warnings_on_exit" value="1"/>
+
+    <!-- Specify indentation -->
+    <arg name="tab-width" value="4"/>
+    <rule ref="Generic.WhiteSpace.ScopeIndent">
+        <properties>
+            <property name="indent" value="4"/>
+            <property name="tabIndent" value="true"/>
+        </properties>
+    </rule>
+
+    <!-- Custom capabilities for DocsManager -->
+    <rule ref="WordPress.WP.Capabilities">
+        <properties>
+            <property name="custom_capabilities" type="array">
+                <element value="mcc_access_docs"/>
+                <element value="mcc_edit_docs"/>
+                <element value="mcc_create_docs"/>
+                <element value="mcc_delete_docs"/>
+            </property>
+        </properties>
+    </rule>
+</ruleset>
