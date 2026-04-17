@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.4.0](https://github.com/morntag/wp-docsmanager/compare/v0.3.0...v0.4.0) (2026-04-17)
+
+### Features
+
+* wire plugin update checker and release zip packaging ([2533201](https://github.com/morntag/wp-docsmanager/commit/2533201b6ad0389bc8aa2c3d150f4e49e36c5bff))
+
+### Bug Fixes
+
+* resolve editor bundle url for standalone plugin layout ([701f8cf](https://github.com/morntag/wp-docsmanager/commit/701f8cfe42fdc8d9d9c93a226b1581bd94868466))
+
 ## [0.3.0](https://github.com/morntag/wp-docsmanager/compare/v0.2.0...v0.3.0) (2026-04-17)
 
 ### Features
