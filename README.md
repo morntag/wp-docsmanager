@@ -24,7 +24,7 @@ Add to your host plugin's `composer.json`:
     { "type": "vcs", "url": "git@github.com:morntag/wp-docsmanager.git" }
   ],
   "require": {
-    "morntag/wp-docsmanager": "dev-main"
+    "morntag/wp-docsmanager": "^0.1"
   }
 }
 ```
@@ -118,6 +118,20 @@ composer test             # Unit tests (no WordPress bootstrap needed)
 ```
 
 Rules are in `phpcs.xml` (WordPress-Extra + Core + Docs). Static analysis config is in `phpstan.neon`. Unit tests are in `tests/Unit/` with WordPress functions stubbed.
+
+### Git hooks
+
+This project uses [Lefthook](https://github.com/evilmartians/lefthook) for git hooks. After `npm install`, hooks are set up automatically:
+
+- **commit-msg** — enforces [conventional commits](https://www.conventionalcommits.org/) (e.g. `feat: add search`, `fix: null check`)
+- **pre-commit** — auto-fixes and lints staged PHP (PHPCS) and JS (Biome) files
+- **pre-push** — validates branch naming (`feature/*`, `bugfix/*`, `hotfix/*`)
+
+### Releases
+
+Releases are automated via GitHub Actions. Push to `main` runs the test suite, then [release-it](https://github.com/release-it/release-it) determines the version bump from conventional commits, updates `CHANGELOG.md`, and creates a GitHub Release with a git tag.
+
+Consumers update via `composer update morntag/wp-docsmanager`.
 
 ## License
 

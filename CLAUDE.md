@@ -27,12 +27,37 @@ composer phpstan                  # Static analysis (level 6)
 composer test                     # PHPUnit unit tests (no WP bootstrap needed)
 ./vendor/bin/phpcs <file>         # Lint a specific file
 ./vendor/bin/phpcbf <file>        # Auto-fix a specific file
+npx @biomejs/biome check assets/src/  # Lint/format JS source files
 ```
 
-- PHPCS rules: `phpcs.xml` — WordPress-Extra + Core + Docs, tabs, `WordPress.Files.FileName` excluded
+- PHPCS rules: `phpcs.xml` — WordPress-Extra + Core + Docs, tabs, `WordPress.Files.FileName` excluded, `tests/` excluded
 - PHPStan config: `phpstan.neon` — level 6, excludes `views/` (template files use injected scope variables)
 - PHPUnit config: `phpunit.xml` — unit tests in `tests/Unit/`, WP functions stubbed in `tests/bootstrap.php`
+- Biome config: `biome.json` — JS formatter/import organizer (tabs, semicolons, single quotes), ignores `editor.bundle.js`
 - `DocsManager.php` has 5 intentional direct-DB-call warnings (bypasses WP for memory reasons) — these are expected
+
+## Git Hooks & Conventions
+
+[Lefthook](https://github.com/evilmartians/lefthook) enforces quality on every commit/push:
+
+- **commit-msg** — [commitlint](https://commitlint.js.org/) validates conventional commits. Allowed types: `feat`, `fix`, `docs`, `chore`, `ci`, `refactor`, `style`, `agent`, `wip`
+- **pre-commit** — PHPCBF auto-fix + PHPCS on staged PHP files; Biome auto-fix + check on staged JS files
+- **pre-push** — Branch naming: `main`, `dev`, `feature/*`, `bugfix/*`, `hotfix/*` (lowercase, hyphens only)
+
+After cloning, run `npm install` — lefthook installs automatically.
+
+## Release Workflow
+
+Automated via [release-it](https://github.com/release-it/release-it) + GitHub Actions (`.github/workflows/release.yml`):
+
+1. Push to `main` triggers CI
+2. **Gate**: PHPUnit, PHPStan, PHPCS must all pass
+3. **Release**: release-it analyzes conventional commits, determines semver bump, updates `composer.json` version, generates `CHANGELOG.md`, creates git tag + GitHub Release
+4. Release commits (`chore(release): v*`) are auto-skipped
+
+Only `feat` and `fix` commits trigger a release. `chore`, `docs`, `style`, `wip` are no-ops.
+
+Manual dry-run: trigger the workflow via GitHub Actions UI with the dry-run checkbox, or locally with `npm run release:dry`.
 
 ## Architecture
 
