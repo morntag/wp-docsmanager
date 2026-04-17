@@ -53,9 +53,12 @@ $doc_path       = isset( $_GET['path'] ) ? sanitize_text_field( wp_unslash( $_GE
 
 	<?php
 	$docsmanager_settings     = $this->get_settings();
+	$docsmanager_modules_on   = ! empty( $docsmanager_settings['modules_scan_enabled'] );
+	$docsmanager_docs_on      = ! empty( $docsmanager_settings['docs_scan_enabled'] );
+	$docsmanager_any_scan_on  = $docsmanager_modules_on || $docsmanager_docs_on;
 	$docsmanager_needs_config = (
 		empty( $docsmanager_settings['plugin_slug'] )
-		|| ( empty( $docsmanager_settings['modules_scan_enabled'] ) && empty( $docsmanager_settings['docs_scan_enabled'] ) )
+		|| ! $docsmanager_any_scan_on
 	);
 	if ( $docsmanager_needs_config ) :
 		$docsmanager_settings_url = admin_url( 'admin.php?page=mcc-documentation-settings' );
@@ -82,72 +85,80 @@ $doc_path       = isset( $_GET['path'] ) ? sanitize_text_field( wp_unslash( $_GE
 		<div class="mcc-docs-sidebar">
 			<div class="mcc-docs-search">
 				<input type="text" id="mcc-docs-search" placeholder="<?php esc_attr_e( 'Search documentation...', 'morntag-docs' ); ?>" />
+				<?php if ( $docsmanager_any_scan_on ) : ?>
+					<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mcc-docs-rescan">
+						<input type="hidden" name="action" value="morntag_docs_rescan" />
+						<?php wp_nonce_field( 'morntag_docs_rescan' ); ?>
+						<button type="submit" class="button button-secondary mcc-docs-rescan-button" title="<?php esc_attr_e( 'Rescan file-based documentation now', 'wp-docsmanager' ); ?>" aria-label="<?php esc_attr_e( 'Rescan file-based documentation now', 'wp-docsmanager' ); ?>">
+							<span class="dashicons dashicons-update" aria-hidden="true"></span>
+							<span class="screen-reader-text"><?php esc_html_e( 'Rescan now', 'wp-docsmanager' ); ?></span>
+						</button>
+					</form>
+				<?php endif; ?>
 			</div>
 
-			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mcc-docs-rescan">
-				<input type="hidden" name="action" value="morntag_docs_rescan" />
-				<?php wp_nonce_field( 'morntag_docs_rescan' ); ?>
-				<button type="submit" class="button button-secondary"><?php esc_html_e( 'Rescan now', 'wp-docsmanager' ); ?></button>
-			</form>
-
 			<ul class="mcc-docs-nav">
-				<!-- Module Documentation -->
-				<li class="mcc-docs-nav-section">
-					<h3 data-section="modules">
-						<span class="dashicons dashicons-arrow-down mcc-docs-toggle"></span>
-						<?php esc_html_e( 'Module Documentation', 'morntag-docs' ); ?>
-					</h3>
-					<ul class="mcc-docs-nav-items">
-						<?php
-						$modules = $this->get_file_scanner()->scan_module_readmes();
-						foreach ( $modules as $module ) :
-							$module_url = add_query_arg(
-								array(
-									'page' => 'mcc-documentation',
-									'type' => 'module',
-									'path' => rawurlencode( $module['path'] ),
-								),
-								admin_url( 'admin.php' )
-							);
-							$is_current = ( 'module' === $doc_type && $doc_path === $module['path'] );
-							?>
-							<li class="<?php echo $is_current ? 'current' : ''; ?>">
-								<a href="<?php echo esc_url( $module_url ); ?>">
-									<?php echo esc_html( $module['title'] ); ?>
-								</a>
-							</li>
-						<?php endforeach; ?>
-					</ul>
-				</li>
+				<?php if ( $docsmanager_modules_on ) : ?>
+					<!-- Module Documentation -->
+					<li class="mcc-docs-nav-section">
+						<h3 data-section="modules">
+							<span class="dashicons dashicons-arrow-down mcc-docs-toggle"></span>
+							<?php esc_html_e( 'Module Documentation', 'morntag-docs' ); ?>
+						</h3>
+						<ul class="mcc-docs-nav-items">
+							<?php
+							$modules = $this->get_file_scanner()->scan_module_readmes();
+							foreach ( $modules as $module ) :
+								$module_url = add_query_arg(
+									array(
+										'page' => 'mcc-documentation',
+										'type' => 'module',
+										'path' => rawurlencode( $module['path'] ),
+									),
+									admin_url( 'admin.php' )
+								);
+								$is_current = ( 'module' === $doc_type && $doc_path === $module['path'] );
+								?>
+								<li class="<?php echo $is_current ? 'current' : ''; ?>">
+									<a href="<?php echo esc_url( $module_url ); ?>">
+										<?php echo esc_html( $module['title'] ); ?>
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</li>
+				<?php endif; ?>
 
-				<!-- Development Documentation -->
-				<li class="mcc-docs-nav-section">
-					<h3 data-section="development">
-						<span class="dashicons dashicons-arrow-down mcc-docs-toggle"></span>
-						<?php esc_html_e( 'Development Documentation', 'morntag-docs' ); ?>
-					</h3>
-					<ul class="mcc-docs-nav-items">
-						<?php
-						$docs = $this->get_file_scanner()->scan_docs_directory();
-						foreach ( $docs as $doc ) :
-							$doc_url    = add_query_arg(
-								array(
-									'page' => 'mcc-documentation',
-									'type' => 'docs',
-									'path' => rawurlencode( $doc['path'] ),
-								),
-								admin_url( 'admin.php' )
-							);
-							$is_current = ( 'docs' === $doc_type && $doc_path === $doc['path'] );
-							?>
-							<li class="<?php echo $is_current ? 'current' : ''; ?>">
-								<a href="<?php echo esc_url( $doc_url ); ?>">
-									<?php echo esc_html( $doc['title'] ); ?>
-								</a>
-							</li>
-						<?php endforeach; ?>
-					</ul>
-				</li>
+				<?php if ( $docsmanager_docs_on ) : ?>
+					<!-- Development Documentation -->
+					<li class="mcc-docs-nav-section">
+						<h3 data-section="development">
+							<span class="dashicons dashicons-arrow-down mcc-docs-toggle"></span>
+							<?php esc_html_e( 'Development Documentation', 'morntag-docs' ); ?>
+						</h3>
+						<ul class="mcc-docs-nav-items">
+							<?php
+							$docs = $this->get_file_scanner()->scan_docs_directory();
+							foreach ( $docs as $doc ) :
+								$doc_url    = add_query_arg(
+									array(
+										'page' => 'mcc-documentation',
+										'type' => 'docs',
+										'path' => rawurlencode( $doc['path'] ),
+									),
+									admin_url( 'admin.php' )
+								);
+								$is_current = ( 'docs' === $doc_type && $doc_path === $doc['path'] );
+								?>
+								<li class="<?php echo $is_current ? 'current' : ''; ?>">
+									<a href="<?php echo esc_url( $doc_url ); ?>">
+										<?php echo esc_html( $doc['title'] ); ?>
+									</a>
+								</li>
+							<?php endforeach; ?>
+						</ul>
+					</li>
+				<?php endif; ?>
 
 				<!-- Custom Documentation -->
 				<li class="mcc-docs-nav-section">

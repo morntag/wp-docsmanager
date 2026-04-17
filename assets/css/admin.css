@@ -26,13 +26,37 @@
 .mcc-docs-search {
 	padding: 15px;
 	border-bottom: 1px solid #ddd;
+	display: flex;
+	align-items: center;
+	gap: 6px;
 }
 
 .mcc-docs-search input {
-	width: 100%;
+	flex: 1;
+	min-width: 0;
 	padding: 8px;
 	border: 1px solid #ddd;
 	border-radius: 4px;
+}
+
+.mcc-docs-rescan {
+	margin: 0;
+	flex-shrink: 0;
+}
+
+.mcc-docs-rescan-button {
+	display: inline-flex !important;
+	align-items: center;
+	justify-content: center;
+	width: 34px;
+	padding: 0 !important;
+}
+
+.mcc-docs-rescan-button .dashicons {
+	width: 18px;
+	height: 18px;
+	font-size: 18px;
+	line-height: 1;
 }
 
 .mcc-docs-nav {
