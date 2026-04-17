@@ -1,7 +1,7 @@
 {
   "name": "morntag/wp-docsmanager",
   "description": "Standalone documentation manager module for WordPress plugins. Provides a custom post type, admin UI, Tiptap-based Markdown editor, and filesystem scanner for per-module READMEs.",
-  "version": "0.0.0",
+  "version": "0.2.0",
   "type": "library",
   "license": "GPL-2.0-or-later",
   "authors": [
