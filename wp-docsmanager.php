@@ -3,7 +3,7 @@
  * Plugin Name: WP Docs Manager
  * Plugin URI:  https://github.com/morntag/wp-docsmanager
  * Description: Admin UI, Tiptap-based Markdown editor, and filesystem scanner for documenting WordPress plugins — auto-discovers READMEs and .docs trees inside any active plugin.
- * Version:     0.4.0
+ * Version:     0.4.1
  * Author:      morntag.com
  * Author URI:  https://morntag.com
  * License:     GPL-2.0-or-later

@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.4.1](https://github.com/morntag/wp-docsmanager/compare/v0.4.0...v0.4.1) (2026-04-17)
+
+### Bug Fixes
+
+* harden release-it after:bump hook against template engine ([ac2bde1](https://github.com/morntag/wp-docsmanager/commit/ac2bde1d1db340e917134cb85945d3d671c13e6e))
+
 ## [0.4.0](https://github.com/morntag/wp-docsmanager/compare/v0.3.0...v0.4.0) (2026-04-17)
 
 ### Features
