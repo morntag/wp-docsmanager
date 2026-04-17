@@ -2,3 +2,6 @@
 /vendor/
 .DS_Store
 *.log
+.phpunit.cache/
+implement-learnings.md
+/plans/
