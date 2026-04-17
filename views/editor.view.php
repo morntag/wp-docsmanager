@@ -59,8 +59,8 @@ if ( $edit_post ) {
 // Form submission is handled in DocsManager::handle_form_submission() via admin_init hook
 // to ensure redirects work properly before headers are sent.
 
-// Enqueue Tiptap - get DocsManager directory URL.
-$docs_manager_url = plugin_dir_url( dirname( __DIR__ ) ) . 'DocsManager/';
+// Enqueue Tiptap.
+$docs_manager_url = plugin_dir_url( dirname( __DIR__ ) . '/wp-docsmanager.php' );
 
 wp_enqueue_script(
 	'mcc-docs-tiptap-editor',
