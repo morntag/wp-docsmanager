@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.5.0](https://github.com/morntag/wp-docsmanager/compare/v0.4.1...v0.5.0) (2026-04-17)
+
+### Features
+
+* hide rescan and scan sections when no file scans are enabled ([0bb7fe1](https://github.com/morntag/wp-docsmanager/commit/0bb7fe12bb13387745d35b3d55c79de0ec0dc20c))
+
 ## [0.4.1](https://github.com/morntag/wp-docsmanager/compare/v0.4.0...v0.4.1) (2026-04-17)
 
 ### Bug Fixes
