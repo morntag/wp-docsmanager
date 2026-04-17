@@ -21,13 +21,6 @@ if ( ! defined( 'ABSPATH' ) ) {
 	exit;
 }
 
-// In multisite, documentation is only on the main site, so switch context if needed.
-$switched_to_main = false;
-if ( is_multisite() && get_current_blog_id() !== 1 ) {
-	switch_to_blog( 1 );
-	$switched_to_main = true;
-}
-
 // Get current action and parameters.
 // phpcs:disable WordPress.Security.NonceVerification.Recommended -- Read-only operations.
 $current_action = isset( $_GET['action'] ) ? sanitize_text_field( wp_unslash( $_GET['action'] ) ) : 'list';
@@ -49,7 +42,34 @@ $doc_path       = isset( $_GET['path'] ) ? sanitize_text_field( wp_unslash( $_GE
 		</div>
 	<?php endif; ?>
 
-	<?php if ( $this->user_can( 'mcc_create_docs' ) && ! in_array( $current_action, array( 'new', 'edit' ), true ) ) : ?>
+	<?php
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- Read-only display.
+	if ( isset( $_GET['rescanned'] ) && '1' === $_GET['rescanned'] ) :
+		?>
+		<div class="notice notice-success is-dismissible">
+			<p><?php esc_html_e( 'Documentation scanner caches cleared.', 'wp-docsmanager' ); ?></p>
+		</div>
+	<?php endif; ?>
+
+	<?php
+	$docsmanager_settings     = $this->get_settings();
+	$docsmanager_needs_config = (
+		empty( $docsmanager_settings['plugin_slug'] )
+		|| ( empty( $docsmanager_settings['modules_scan_enabled'] ) && empty( $docsmanager_settings['docs_scan_enabled'] ) )
+	);
+	if ( $docsmanager_needs_config ) :
+		$docsmanager_settings_url = admin_url( 'admin.php?page=mcc-documentation-settings' );
+		?>
+		<div class="notice notice-info">
+			<p>
+				<?php esc_html_e( 'File-based documentation is not configured yet.', 'wp-docsmanager' ); ?>
+				<a href="<?php echo esc_url( $docsmanager_settings_url ); ?>"><?php esc_html_e( 'Open Settings →', 'wp-docsmanager' ); ?></a>
+				<?php esc_html_e( 'to pick a plugin and subpaths.', 'wp-docsmanager' ); ?>
+			</p>
+		</div>
+	<?php endif; ?>
+
+	<?php if ( $this->user_can( 'docsmanager_edit_docs' ) && ! in_array( $current_action, array( 'new', 'edit' ), true ) ) : ?>
 		<a href="<?php echo esc_url( admin_url( 'admin.php?page=mcc-documentation&action=new' ) ); ?>" class="page-title-action">
 			<?php esc_html_e( 'Add New', 'morntag-docs' ); ?>
 		</a>
@@ -63,6 +83,12 @@ $doc_path       = isset( $_GET['path'] ) ? sanitize_text_field( wp_unslash( $_GE
 			<div class="mcc-docs-search">
 				<input type="text" id="mcc-docs-search" placeholder="<?php esc_attr_e( 'Search documentation...', 'morntag-docs' ); ?>" />
 			</div>
+
+			<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" class="mcc-docs-rescan">
+				<input type="hidden" name="action" value="morntag_docs_rescan" />
+				<?php wp_nonce_field( 'morntag_docs_rescan' ); ?>
+				<button type="submit" class="button button-secondary"><?php esc_html_e( 'Rescan now', 'wp-docsmanager' ); ?></button>
+			</form>
 
 			<ul class="mcc-docs-nav">
 				<!-- Module Documentation -->
@@ -224,7 +250,7 @@ $doc_path       = isset( $_GET['path'] ) ? sanitize_text_field( wp_unslash( $_GE
 			switch ( $current_action ) {
 				case 'new':
 				case 'edit':
-					if ( $this->user_can( 'mcc_edit_docs' ) ) {
+					if ( $this->user_can( 'docsmanager_edit_docs' ) ) {
 						require __DIR__ . '/editor.view.php';
 					} else {
 						echo '<div class="notice notice-error"><p>' . esc_html__( 'You do not have permission to edit documents.', 'morntag-docs' ) . '</p></div>';
@@ -240,10 +266,3 @@ $doc_path       = isset( $_GET['path'] ) ? sanitize_text_field( wp_unslash( $_GE
 		</div>
 	</div>
 </div>
-
-<?php
-// Restore original blog if we switched.
-if ( $switched_to_main ) {
-	restore_current_blog();
-}
-?>

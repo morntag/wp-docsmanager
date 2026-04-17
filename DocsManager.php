@@ -4,7 +4,11 @@ namespace Morntag\WpDocsManager;
 use Morntag\WpDocsManager\Models\Documentation;
 use Morntag\WpDocsManager\Services\FileScanner;
 use Morntag\WpDocsManager\Services\MarkdownParser;
+use Morntag\WpDocsManager\Services\PathResolver;
+use Morntag\WpDocsManager\Services\RescanHandler;
 use Morntag\WpDocsManager\Services\SearchService;
+use Morntag\WpDocsManager\Services\SettingsPage;
+use Morntag\WpDocsManager\Services\SettingsRepository;
 
 /**
  * Documentation Manager Module
@@ -36,20 +40,16 @@ class DocsManager extends Module {
 	private FileScanner $file_scanner;
 	private MarkdownParser $markdown_parser;
 	private SearchService $search_service;
+	private SettingsRepository $settings_repository;
+	private PathResolver $path_resolver;
+	private SettingsPage $settings_page;
 
 	/**
-	 * Module configuration (scan paths, allowed roots, etc.)
+	 * Resolved settings array loaded from the `docsmanager_settings` option.
 	 *
 	 * @var array<string,mixed>
 	 */
-	private array $config = array();
-
-	/**
-	 * Pending config injected via boot() and consumed by the next instance() call.
-	 *
-	 * @var array<string,mixed>
-	 */
-	private static array $pending_config = array();
+	private array $settings = array();
 
 	protected $hooks = array(
 		'init'                        => 'register_post_types',
@@ -78,43 +78,39 @@ class DocsManager extends Module {
 	);
 
 	/**
-	 * Bootstrap the module with runtime configuration.
-	 *
-	 * Stores the config so the next instance() call (which runs the
-	 * protected constructor) can read it. After construction, the
-	 * pending config is cleared so it cannot leak into later callers.
-	 *
-	 * Recognised keys:
-	 * - 'modules_dir'  (string)   Absolute path to a directory scanned for "<module>/README.md" files
-	 * - 'docs_dir'     (string)   Absolute path to a .docs-style tree of markdown files
-	 * - 'allowed_roots'(string[]) Directories whose descendants may be rendered by the viewer
-	 *
-	 * @param array<string,mixed> $config Runtime config.
-	 * @return self
-	 */
-	public static function boot( array $config = array() ): self {
-		self::$pending_config = $config;
-		return self::instance();
-	}
-
-	/**
 	 * Initialize module
 	 *
 	 * Called by parent Module constructor. Instantiates services.
-	 * Module is only instantiated on main site (checked before instance creation).
 	 * CPT/taxonomy registration happens via 'init' hook, capabilities via 'admin_init'.
 	 */
 	public function init(): void {
-		$this->config         = self::$pending_config;
-		self::$pending_config = array();
+		$this->settings_repository = new SettingsRepository();
+		$this->path_resolver       = new PathResolver();
+		$this->settings            = $this->settings_repository->get();
+
+		$modules_dir = $this->path_resolver->resolve_modules_path( $this->settings );
+		$docs_dir    = $this->path_resolver->resolve_docs_path( $this->settings );
 
 		$this->documentation   = new Documentation();
-		$this->file_scanner    = new FileScanner(
-			isset( $this->config['modules_dir'] ) && is_string( $this->config['modules_dir'] ) ? $this->config['modules_dir'] : '',
-			isset( $this->config['docs_dir'] ) && is_string( $this->config['docs_dir'] ) ? $this->config['docs_dir'] : ''
-		);
+		$this->file_scanner    = new FileScanner( $modules_dir, $docs_dir );
 		$this->markdown_parser = new MarkdownParser();
 		$this->search_service  = new SearchService();
+		$this->settings_page   = new SettingsPage( $this->settings_repository );
+
+		// Wire the "Rescan now" admin-post action so the sidebar button has a
+		// real endpoint to POST to.
+		if ( function_exists( 'add_action' ) ) {
+			add_action( 'admin_post_' . RescanHandler::ACTION, array( RescanHandler::class, 'handle_request' ) );
+		}
+	}
+
+	/**
+	 * Expose the current settings array to views (empty-state notice, etc.).
+	 *
+	 * @return array<string,mixed>
+	 */
+	public function get_settings(): array {
+		return $this->settings;
 	}
 
 	/**
@@ -126,17 +122,7 @@ class DocsManager extends Module {
 	 * @return string[]
 	 */
 	public function get_allowed_roots(): array {
-		if ( ! isset( $this->config['allowed_roots'] ) || ! is_array( $this->config['allowed_roots'] ) ) {
-			return array();
-		}
-
-		$roots = array();
-		foreach ( $this->config['allowed_roots'] as $root ) {
-			if ( is_string( $root ) && '' !== $root ) {
-				$roots[] = $root;
-			}
-		}
-		return $roots;
+		return $this->path_resolver->allowed_roots( $this->settings );
 	}
 
 	/**
@@ -148,7 +134,7 @@ class DocsManager extends Module {
 	 * WordPress's `manage_options` check so administrators always have
 	 * access out of the box.
 	 *
-	 * @param string $cap Capability identifier (e.g. 'mcc_access_docs').
+	 * @param string $cap Capability identifier (e.g. 'docsmanager_access_docs').
 	 * @return bool
 	 */
 	public function user_can( string $cap ): bool {
@@ -177,7 +163,7 @@ class DocsManager extends Module {
 	 */
 	public function add_admin_menu(): void {
 		// Check for capability or administrator role as fallback.
-		if ( ! $this->user_can( 'mcc_access_docs' ) ) {
+		if ( ! $this->user_can( 'docsmanager_access_docs' ) ) {
 			return;
 		}
 
@@ -251,6 +237,15 @@ class DocsManager extends Module {
 	}
 
 	/**
+	 * Get the settings page service.
+	 *
+	 * @return SettingsPage
+	 */
+	public function get_settings_page(): SettingsPage {
+		return $this->settings_page;
+	}
+
+	/**
 	 * Get the markdown parser service
 	 *
 	 * @return MarkdownParser
@@ -291,7 +286,7 @@ class DocsManager extends Module {
 		}
 
 		// Check permissions.
-		if ( ! $this->user_can( 'mcc_edit_docs' ) ) {
+		if ( ! $this->user_can( 'docsmanager_edit_docs' ) ) {
 			return;
 		}
 
@@ -413,7 +408,7 @@ class DocsManager extends Module {
 		}
 
 		// Check permissions.
-		if ( ! $this->user_can( 'mcc_delete_docs' ) ) {
+		if ( ! $this->user_can( 'docsmanager_delete_docs' ) ) {
 			add_action(
 				'admin_notices',
 				function () {
@@ -472,7 +467,7 @@ class DocsManager extends Module {
 		}
 
 		// Check capabilities.
-		if ( ! $this->user_can( 'mcc_access_docs' ) ) {
+		if ( ! $this->user_can( 'docsmanager_access_docs' ) ) {
 			wp_die( 'Insufficient permissions' );
 		}
 
@@ -497,7 +492,7 @@ class DocsManager extends Module {
 		}
 
 		// Check capabilities.
-		if ( ! $this->user_can( 'mcc_access_docs' ) ) {
+		if ( ! $this->user_can( 'docsmanager_access_docs' ) ) {
 			wp_die( 'Insufficient permissions' );
 		}
 

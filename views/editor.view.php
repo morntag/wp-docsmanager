@@ -166,7 +166,7 @@ wp_enqueue_script(
 				<?php esc_html_e( 'Cancel', 'morntag-docs' ); ?>
 			</a>
 
-			<?php if ( $edit_post_id && $this->user_can( 'mcc_delete_docs' ) ) : ?>
+			<?php if ( $edit_post_id && $this->user_can( 'docsmanager_delete_docs' ) ) : ?>
 				<?php
 				$delete_url = wp_nonce_url(
 					add_query_arg(

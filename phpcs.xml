@@ -63,10 +63,9 @@
     <rule ref="WordPress.WP.Capabilities">
         <properties>
             <property name="custom_capabilities" type="array">
-                <element value="mcc_access_docs"/>
-                <element value="mcc_edit_docs"/>
-                <element value="mcc_create_docs"/>
-                <element value="mcc_delete_docs"/>
+                <element value="docsmanager_access_docs"/>
+                <element value="docsmanager_edit_docs"/>
+                <element value="docsmanager_delete_docs"/>
             </property>
         </properties>
     </rule>

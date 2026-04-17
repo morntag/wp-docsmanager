@@ -35,13 +35,6 @@ $doc_title   = '';
 $is_readonly = false;
 $raw_content = '';
 
-// In multisite, documentation is only on the main site, so we need to switch context.
-$switched_to_main = false;
-if ( is_multisite() && get_current_blog_id() !== 1 ) {
-	switch_to_blog( 1 );
-	$switched_to_main = true;
-}
-
 // Load content based on type.
 if ( 'module' === $doc_type || 'docs' === $doc_type ) {
 	// File-based documentation (readonly).
@@ -123,7 +116,7 @@ if ( empty( $doc_content ) && empty( $doc_type ) && 0 === $doc_id && ! isset( $_
 				</li>
 			</ul>
 
-			<?php if ( $this->user_can( 'mcc_create_docs' ) ) : ?>
+			<?php if ( $this->user_can( 'docsmanager_edit_docs' ) ) : ?>
 				<p>
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=mcc-documentation&action=new' ) ); ?>" class="button button-primary">
 						<?php esc_html_e( 'Create New Document', 'morntag-docs' ); ?>
@@ -157,12 +150,12 @@ endif;
 					<?php esc_html_e( 'Read Only', 'morntag-docs' ); ?>
 				</span>
 			<?php elseif ( $doc_id > 0 ) : ?>
-				<?php if ( $this->user_can( 'mcc_edit_docs' ) ) : ?>
+				<?php if ( $this->user_can( 'docsmanager_edit_docs' ) ) : ?>
 					<a href="<?php echo esc_url( admin_url( 'admin.php?page=mcc-documentation&action=edit&doc_id=' . $doc_id ) ); ?>" class="button">
 						<?php esc_html_e( 'Edit', 'morntag-docs' ); ?>
 					</a>
 				<?php endif; ?>
-				<?php if ( $this->user_can( 'mcc_delete_docs' ) ) : ?>
+				<?php if ( $this->user_can( 'docsmanager_delete_docs' ) ) : ?>
 					<?php
 					$delete_url = wp_nonce_url(
 						add_query_arg(
@@ -208,7 +201,7 @@ endif;
 			?>
 			<div class="notice notice-info inline">
 				<p><?php esc_html_e( 'This document has no content yet.', 'morntag-docs' ); ?></p>
-				<?php if ( ! $is_readonly && $this->user_can( 'mcc_edit_docs' ) && $doc_id > 0 ) : ?>
+				<?php if ( ! $is_readonly && $this->user_can( 'docsmanager_edit_docs' ) && $doc_id > 0 ) : ?>
 					<p>
 						<a href="<?php echo esc_url( admin_url( 'admin.php?page=mcc-documentation&action=edit&doc_id=' . $doc_id ) ); ?>" class="button button-primary">
 							<?php esc_html_e( 'Add Content', 'morntag-docs' ); ?>
@@ -255,10 +248,3 @@ endif;
 		</div>
 	<?php endif; ?>
 </div>
-
-<?php
-// Restore original blog if we switched.
-if ( $switched_to_main ) {
-	restore_current_blog();
-}
-?>
