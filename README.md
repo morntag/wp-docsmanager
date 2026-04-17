@@ -11,7 +11,7 @@ Originally extracted from `morntag/mcc-baspo`; now ships as an independent open-
 - **Tiptap Markdown editor** — WYSIWYG authoring with image uploads, embedded videos, and internal-link picker
 - **Search** — unified full-text search across both file-based and custom docs
 - **Per-site multisite** — activates independently on each subsite
-- **Self-updating** — pulls updates straight from GitHub Releases (Phase 3)
+- **Self-updating** — pulls updates straight from GitHub Releases via plugin-update-checker
 
 ## Installation
 

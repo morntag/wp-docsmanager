@@ -13,6 +13,7 @@ CLAUDE.md
 lefthook.yml
 commitlint.config.js
 .release-it.json
+.zipexclude
 CHANGELOG.md
 plans
 .env
