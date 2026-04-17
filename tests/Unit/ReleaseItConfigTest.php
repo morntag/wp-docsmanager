@@ -78,6 +78,59 @@ class ReleaseItConfigTest extends TestCase {
 	}
 
 	/**
+	 * Regression: simulate release-it's template expansion of `${version}`
+	 * and run the resulting shell command against a copy of the plugin file.
+	 * The corrupted-header bug from 2026-04-17 (release-it ate `${1}` as a
+	 * template var, perl then nuked the whole header line) would re-trip this
+	 * test before reaching CI. Skipped on environments without /usr/bin/perl.
+	 */
+	public function test_after_bump_perl_actually_patches_header_correctly(): void {
+		if ( ! is_executable( '/usr/bin/perl' ) && ! is_executable( '/opt/local/bin/perl' ) ) {
+			$this->markTestSkipped( 'perl not available on this host.' );
+		}
+
+		$repo_root   = dirname( __DIR__, 2 );
+		$source_file = $repo_root . '/wp-docsmanager.php';
+		$tmp_file    = tempnam( sys_get_temp_dir(), 'wpd_header_' );
+		copy( $source_file, $tmp_file );
+
+		// Mirror release-it's template expansion. The 2026-04-17 incident
+		// proved release-it does NOT respect shell single-quoting: it walks the
+		// raw command string and substitutes ANY ${...} pattern. Unknown vars
+		// (like a perl backref ${1}) get replaced with the inner token, which
+		// is exactly how the corrupted ` * Version:` line ended up as `10.4.0`.
+		$expanded_command = str_replace( '${version}', '9.9.9', $this->after_bump );
+		$expanded_command = (string) preg_replace( '/\$\{(\w+)\}/', '$1', $expanded_command );
+
+		// Retarget the command at our temp file instead of wp-docsmanager.php.
+		$expanded_command = str_replace( 'wp-docsmanager.php', escapeshellarg( $tmp_file ), $expanded_command );
+
+		$exit_code = 0;
+		$output    = array();
+		exec( $expanded_command . ' 2>&1', $output, $exit_code );
+
+		$this->assertSame(
+			0,
+			$exit_code,
+			"release-it after:bump command failed (exit {$exit_code}): " . implode( "\n", $output )
+		);
+
+		$patched = (string) file_get_contents( $tmp_file );
+		unlink( $tmp_file );
+
+		$this->assertStringContainsString(
+			' * Version:     9.9.9',
+			$patched,
+			'after:bump must rewrite the plugin header Version line to ` * Version:     9.9.9` exactly. If this fails, release-it likely interpolated a perl backref token (e.g. ${1}) — drop the backref and hardcode the prefix.'
+		);
+		$this->assertStringNotContainsString(
+			'19.9.9',
+			$patched,
+			'after:bump produced corrupted version "19.9.9" — release-it ate a `${1}` backref again.'
+		);
+	}
+
+	/**
 	 * AC #6: package.json must expose the release scripts used by CI.
 	 *
 	 * @dataProvider required_package_script_provider

@@ -31,7 +31,7 @@ class PluginHeaderTest extends TestCase {
 
 		$required = array(
 			'plugin_name'  => '/Plugin Name:\s*WP Docs Manager/i',
-			'version'      => '/Version:\s*0\.3\.0/i',
+			'version'      => '/Version:\s*\d+\.\d+\.\d+/i',
 			'author'       => '/Author:\s*morntag\.com/i',
 			'license'      => '/License:\s*GPL-2\.0-or-later/i',
 			'text_domain'  => '/Text Domain:\s*wp-docsmanager/i',
