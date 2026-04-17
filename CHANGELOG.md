@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.3.0](https://github.com/morntag/wp-docsmanager/compare/v0.2.0...v0.3.0) (2026-04-17)
+
+### Features
+
+* convert to standalone wordpress plugin [skip ci] ([50eb481](https://github.com/morntag/wp-docsmanager/commit/50eb48177a55e4ee94fd62a3ec5f3e24d38d607e))
+
 ## [0.2.0](https://github.com/morntag/wp-docsmanager/compare/v0.1.1...v0.2.0) (2026-04-17)
 
 ### Features
