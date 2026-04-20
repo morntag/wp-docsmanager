@@ -57,6 +57,10 @@ class MorntagDocsEditor {
 	constructor() {
 		this.editor = null;
 		this.toolbar = null;
+		this.tabs = null;
+		this.editorContainer = null;
+		this.markdownTextarea = null;
+		this.mode = 'visual';
 		this.config = null;
 		this.autosaveDebounced = null;
 	}
@@ -90,13 +94,29 @@ class MorntagDocsEditor {
 			this.config.onSave(markdown);
 		}, 1000);
 
+		// Create tabs (Visual / Markdown)
+		this.createTabs();
+
 		// Create toolbar
 		this.createToolbar();
 
 		// Create editor container
 		const editorContainer = document.createElement('div');
 		editorContainer.className = 'mcc-docs-editor-content';
+		this.editorContainer = editorContainer;
 		this.config.element.appendChild(editorContainer);
+
+		// Create raw markdown textarea (hidden by default)
+		this.markdownTextarea = document.createElement('textarea');
+		this.markdownTextarea.className = 'mcc-docs-editor-markdown';
+		this.markdownTextarea.spellcheck = false;
+		this.markdownTextarea.style.display = 'none';
+		this.markdownTextarea.addEventListener('input', () => {
+			const markdown = this.markdownTextarea.value;
+			this.config.onChange(markdown);
+			this.autosaveDebounced(markdown);
+		});
+		this.config.element.appendChild(this.markdownTextarea);
 
 		// Initialize Tiptap editor
 		this.editor = new Editor({
@@ -120,7 +140,11 @@ class MorntagDocsEditor {
 				TableRow,
 				TableHeader,
 				TableCell,
-				Markdown,
+				Markdown.configure({
+					html: true,
+					transformPastedText: true,
+					transformCopiedText: true,
+				}),
 				TextAlign.configure({
 					types: ['heading', 'paragraph'],
 				}),
@@ -144,6 +168,69 @@ class MorntagDocsEditor {
 		this.updateToolbarState();
 
 		return this;
+	}
+
+	/**
+	 * Create Visual / Markdown tab bar
+	 */
+	createTabs() {
+		this.tabs = document.createElement('div');
+		this.tabs.className = 'mcc-docs-editor-tabs';
+
+		const visualBtn = document.createElement('button');
+		visualBtn.type = 'button';
+		visualBtn.className = 'mcc-docs-editor-tab is-active';
+		visualBtn.dataset.mode = 'visual';
+		visualBtn.textContent = 'Visual';
+
+		const markdownBtn = document.createElement('button');
+		markdownBtn.type = 'button';
+		markdownBtn.className = 'mcc-docs-editor-tab';
+		markdownBtn.dataset.mode = 'markdown';
+		markdownBtn.textContent = 'Markdown';
+
+		[visualBtn, markdownBtn].forEach((btn) => {
+			btn.addEventListener('click', (e) => {
+				e.preventDefault();
+				this.setMode(btn.dataset.mode);
+			});
+			this.tabs.appendChild(btn);
+		});
+
+		this.config.element.appendChild(this.tabs);
+	}
+
+	/**
+	 * Switch between 'visual' and 'markdown' modes
+	 *
+	 * @param {string} mode 'visual' or 'markdown'
+	 */
+	setMode(mode) {
+		if (mode === this.mode || !this.editor) {
+			return;
+		}
+
+		if (mode === 'markdown') {
+			const markdown = this.editor.storage.markdown.getMarkdown();
+			this.markdownTextarea.value = markdown;
+			this.editorContainer.style.display = 'none';
+			this.toolbar.style.display = 'none';
+			this.markdownTextarea.style.display = 'block';
+		} else {
+			const markdown = this.markdownTextarea.value;
+			this.editor.commands.setContent(markdown);
+			this.markdownTextarea.style.display = 'none';
+			this.editorContainer.style.display = '';
+			this.toolbar.style.display = '';
+		}
+
+		this.mode = mode;
+
+		if (this.tabs) {
+			this.tabs.querySelectorAll('.mcc-docs-editor-tab').forEach((btn) => {
+				btn.classList.toggle('is-active', btn.dataset.mode === mode);
+			});
+		}
 	}
 
 	/**
@@ -486,6 +573,9 @@ class MorntagDocsEditor {
 		if (!this.editor) {
 			return '';
 		}
+		if (this.mode === 'markdown' && this.markdownTextarea) {
+			return this.markdownTextarea.value;
+		}
 		return this.editor.storage.markdown.getMarkdown();
 	}
 
@@ -554,6 +644,15 @@ class MorntagDocsEditor {
 			this.toolbar.parentNode.removeChild(this.toolbar);
 			this.toolbar = null;
 		}
+		if (this.tabs && this.tabs.parentNode) {
+			this.tabs.parentNode.removeChild(this.tabs);
+			this.tabs = null;
+		}
+		if (this.markdownTextarea && this.markdownTextarea.parentNode) {
+			this.markdownTextarea.parentNode.removeChild(this.markdownTextarea);
+			this.markdownTextarea = null;
+		}
+		this.editorContainer = null;
 		this.config = null;
 		this.autosaveDebounced = null;
 	}
@@ -572,6 +671,9 @@ class MorntagDocsEditor {
 		},
 		setMarkdown: function (content) {
 			return instance.setMarkdown(content);
+		},
+		setMode: function (mode) {
+			return instance.setMode(mode);
 		},
 		destroy: function () {
 			return instance.destroy();

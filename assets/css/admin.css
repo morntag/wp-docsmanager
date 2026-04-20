@@ -419,6 +419,61 @@ mark {
 	background: #fff;
 }
 
+/* Visual / Markdown tabs */
+.mcc-docs-editor-tabs {
+	display: flex;
+	gap: 2px;
+	padding: 6px 6px 0 6px;
+	background: #f9f9f9;
+	border-bottom: 1px solid #ddd;
+	border-radius: 4px 4px 0 0;
+}
+
+.mcc-docs-editor-tab {
+	padding: 6px 14px;
+	border: 1px solid transparent;
+	border-bottom: none;
+	background: transparent;
+	color: #50575e;
+	cursor: pointer;
+	font-size: 13px;
+	border-radius: 4px 4px 0 0;
+}
+
+.mcc-docs-editor-tab:hover {
+	background: #e8e8e8;
+	color: #1d2327;
+}
+
+.mcc-docs-editor-tab.is-active {
+	background: #fff;
+	color: #1d2327;
+	border-color: #ddd;
+	margin-bottom: -1px;
+	position: relative;
+	z-index: 1;
+}
+
+.mcc-docs-editor-tabs + .mcc-docs-editor-toolbar {
+	border-radius: 0;
+}
+
+/* Raw markdown textarea */
+.mcc-docs-editor-markdown {
+	width: 100%;
+	min-height: 400px;
+	padding: 20px;
+	border: none;
+	outline: none;
+	box-sizing: border-box;
+	font-family: "Monaco", "Menlo", "Consolas", monospace;
+	font-size: 14px;
+	line-height: 1.6;
+	resize: vertical;
+	background: #fff;
+	color: #1d2327;
+}
+
 /* Toolbar */
 .mcc-docs-editor-toolbar {
 	display: flex;
