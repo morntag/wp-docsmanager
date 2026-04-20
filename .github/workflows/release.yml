@@ -119,16 +119,68 @@ jobs:
           # Production-only vendor/ so the ZIP does not ship dev tooling.
           composer install --no-dev --optimize-autoloader
 
+          # Inline exclude list. Kept here (not in a committed .zipexclude file)
+          # because past runs picked up a stale on-disk file and shipped bloat.
+          # Patterns without a leading slash match at any depth (rsync default),
+          # so vendor/**/test matches nested test dirs in every package.
+          cat > .release-excludes <<'EOF'
+          # Repo tooling
+          .git
+          .github
+          .gitignore
+          .zipexclude
+          .release-excludes
+          .claude
+          .env
+          .phpunit.cache
+          node_modules
+          tests
+          plans
+          phpunit.xml
+          phpcs.xml
+          phpstan.neon
+          phpstan-bootstrap.php
+          biome.json
+          package.json
+          package-lock.json
+          composer.json
+          composer.lock
+          lefthook.yml
+          commitlint.config.js
+          .release-it.json
+          CHANGELOG.md
+          CLAUDE.md
+          implement-learnings.md
+          assets/src
+
+          # Vendor bloat (dev/test fixtures, duplicate docs, unused CLI shims)
+          vendor/bin
+          vendor/**/test
+          vendor/**/tests
+          vendor/**/*.md
+          vendor/**/*.dist
+          vendor/**/.travis.yml
+          vendor/**/.gitattributes
+          vendor/**/.gitignore
+          vendor/**/composer.json
+          vendor/yahnis-elsts/plugin-update-checker/vendor
+          vendor/yahnis-elsts/plugin-update-checker/languages
+          EOF
+
           # Stage into a sibling dir named wp-docsmanager/ so the ZIP has a
           # single top-level folder matching the plugin slug.
           STAGING_PARENT=$(mktemp -d)
           STAGING="${STAGING_PARENT}/wp-docsmanager"
           mkdir -p "$STAGING"
-          rsync -a --exclude-from=.zipexclude ./ "$STAGING/"
+          rsync -a --exclude-from=.release-excludes ./ "$STAGING/"
 
           # Build the ZIP in the repo root.
           ZIP="wp-docsmanager-v${VERSION}.zip"
           (cd "$STAGING_PARENT" && zip -r "${GITHUB_WORKSPACE}/${ZIP}" wp-docsmanager)
+
+          echo "ZIP contents (first 40 entries):"
+          unzip -l "$ZIP" | head -40
+          echo "ZIP size: $(du -h "$ZIP" | cut -f1)"
 
           # Attach to the GitHub release release-it just created.
           gh release upload "v${VERSION}" "$ZIP" --clobber

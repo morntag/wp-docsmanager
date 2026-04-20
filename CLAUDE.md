@@ -60,7 +60,7 @@ Only `feat` and `fix` commits trigger a release. `chore`, `docs`, `style`, `wip`
 
 Manual dry-run: trigger the workflow via GitHub Actions UI with the dry-run checkbox, or locally with `npm run release:dry`.
 
-Sites receive updates via [yahnis-elsts/plugin-update-checker](https://github.com/YahnisElsts/plugin-update-checker) (PUC v5), wired in `wp-docsmanager.php` against the public GitHub repo with `enableReleaseAssets()`. Exclusions for the shipped ZIP live in `.zipexclude` (rsync-style patterns).
+Sites receive updates via [yahnis-elsts/plugin-update-checker](https://github.com/YahnisElsts/plugin-update-checker) (PUC v5), wired in `wp-docsmanager.php` against the public GitHub repo with `enableReleaseAssets()`. Exclusions for the shipped ZIP are an **inline heredoc** inside the `Package release ZIP` step in `.github/workflows/release.yml` (rsync-style patterns) — kept inline rather than a committed `.zipexclude` because past runs picked up a stale on-disk file and shipped bloat.
 
 ## Architecture
 
