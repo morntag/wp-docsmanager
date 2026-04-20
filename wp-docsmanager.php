@@ -37,6 +37,12 @@ register_uninstall_hook( __FILE__, array( '\\Morntag\\WpDocsManager\\UninstallHa
 add_action(
 	'plugins_loaded',
 	static function (): void {
+		// On multisite, restrict to the main site of the network.
+		// Documentation is network-wide meta — there's no value in per-subsite
+		// configs, and subsite admins should not see the UI at all.
+		if ( is_multisite() && ! is_main_site() ) {
+			return;
+		}
 		\Morntag\WpDocsManager\DocsManager::instance();
 	},
 	20

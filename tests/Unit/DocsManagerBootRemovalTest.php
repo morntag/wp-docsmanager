@@ -73,26 +73,25 @@ class DocsManagerBootRemovalTest extends TestCase {
 
 	/*
 	|----------------------------------------------------------------------
-	| (6) Multisite main-site restriction removed
+	| (6) Multisite: plugin is gated to the main site in the bootstrap file
 	|----------------------------------------------------------------------
 	*/
 
-	public function test_no_main_site_multisite_guard(): void {
-		$this->assertStringNotContainsString(
-			'get_current_blog_id',
-			$this->source,
-			'DocsManager.php must not short-circuit on get_current_blog_id — per-site activation replaces the main-site gate.'
-		);
-		$this->assertStringNotContainsString(
-			'is_multisite()',
-			$this->source,
-			'DocsManager.php must not branch on is_multisite() — per-site activation replaces the main-site gate.'
+	public function test_bootstrap_gates_to_main_site_on_multisite(): void {
+		$path = dirname( __DIR__, 2 ) . '/wp-docsmanager.php';
+		$this->assertFileExists( $path );
+		$source = (string) file_get_contents( $path );
+
+		$this->assertMatchesRegularExpression(
+			'/is_multisite\(\).*is_main_site\(\)/s',
+			$source,
+			'wp-docsmanager.php must skip DocsManager bootstrap on multisite subsites (is_multisite() && ! is_main_site() gate).'
 		);
 	}
 
 	/*
 	|----------------------------------------------------------------------
-	| View files: no legacy mcc_*_docs caps, no main-site multisite gate
+	| View files: no legacy mcc_*_docs caps
 	|----------------------------------------------------------------------
 	*/
 
@@ -120,23 +119,6 @@ class DocsManagerBootRemovalTest extends TestCase {
 				$cap,
 				$source,
 				"{$relative_path} must not reference legacy cap '{$cap}' — UI-guard call-sites must use docsmanager_*_docs."
-			);
-		}
-	}
-
-	/**
-	 * @dataProvider view_files_provider
-	 */
-	public function test_view_files_have_no_main_site_multisite_gate( string $relative_path ): void {
-		$path = dirname( __DIR__, 2 ) . '/' . $relative_path;
-		$this->assertFileExists( $path );
-		$source = (string) file_get_contents( $path );
-
-		foreach ( array( 'switch_to_blog(', 'get_current_blog_id(', 'is_multisite(' ) as $needle ) {
-			$this->assertStringNotContainsString(
-				$needle,
-				$source,
-				"{$relative_path} must not call {$needle} — per-site activation replaces the main-site gate."
 			);
 		}
 	}

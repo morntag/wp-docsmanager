@@ -154,7 +154,7 @@ Source: `assets/src/editor.js` with custom extensions in `assets/src/extensions/
 
 ### Multisite
 
-Per-site activation. No main-site-only gate. Each subsite gets its own `docsmanager_settings`, its own scanned files, its own custom docs.
+**Main site only.** On a multisite network, the bootstrap in `wp-docsmanager.php` checks `is_multisite() && ! is_main_site()` and returns early — `DocsManager::instance()` is never called on subsites, so no CPT, no admin menu, no AJAX handlers, no settings UI. Documentation is treated as network-wide meta that lives on the main site; subsite admins do not see the plugin at all.
 
 ### Security Model
 
