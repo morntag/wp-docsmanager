@@ -91,9 +91,14 @@ class SettingsPage {
 	/**
 	 * Sanitisation callback invoked by the Settings API on form submit.
 	 *
-	 * Delegates the actual work to SettingsRepository::save() so the same
-	 * logic runs whether the option is written programmatically or via the
-	 * admin form.
+	 * MUST NOT call update_option itself — the Settings API fires this as a
+	 * `sanitize_option_*` filter during its own update_option call. Calling
+	 * update_option from inside a sanitize callback re-enters the filter
+	 * and recurses until the PHP process runs out of memory (502 Bad Gateway).
+	 * So this delegates to SettingsRepository::sanitize() which does the
+	 * validation/cleanup without persisting. On validation failure it returns
+	 * the currently-stored option so the Settings API writes back the same
+	 * value (a no-op).
 	 *
 	 * @param mixed $input Raw form payload.
 	 * @return array<string,mixed> Cleaned settings array.
@@ -103,8 +108,8 @@ class SettingsPage {
 			$input = array();
 		}
 
-		$this->repository->save( $input );
-		return $this->repository->get();
+		$clean = $this->repository->sanitize( $input );
+		return null === $clean ? $this->repository->get() : $clean;
 	}
 
 	/**

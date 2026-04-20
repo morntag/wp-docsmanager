@@ -62,16 +62,22 @@ class SettingsRepository {
 	}
 
 	/**
-	 * Persist settings after sanitising subpath inputs.
+	 * Clean a raw settings payload without persisting it.
 	 *
-	 * If ANY subpath field fails validation, the entire save is short-circuited
-	 * (the option is left unchanged) and a settings error is raised so the
-	 * admin UI can display the rejection. This matches the plan's AC: "settings
-	 * are not saved" when the submission contains invalid data.
+	 * Returns the sanitised array on success, or `null` if any subpath field
+	 * fails validation (in which case `add_settings_error()` is called so the
+	 * admin UI can display the rejection and the caller is expected to preserve
+	 * the currently-stored option unchanged).
+	 *
+	 * Separated from {@see save()} so the Settings API `sanitize_option_*`
+	 * filter can call this cleanly without triggering `update_option`
+	 * recursion (update_option fires the sanitize filter, which previously
+	 * called save → update_option → sanitize → … OOM).
 	 *
 	 * @param array<string,mixed> $settings Raw settings payload.
+	 * @return array{plugin_slug:string,modules_scan_enabled:bool,modules_subpath:string,docs_scan_enabled:bool,docs_subpath:string}|null
 	 */
-	public function save( array $settings ): void {
+	public function sanitize( array $settings ): ?array {
 		$current = $this->get();
 
 		$plugin_slug = isset( $settings['plugin_slug'] ) && is_string( $settings['plugin_slug'] )
@@ -86,7 +92,7 @@ class SettingsRepository {
 			$cleaned = SubpathSanitizer::sanitize( $settings['modules_subpath'] );
 			if ( null === $cleaned ) {
 				$this->raise_invalid_subpath_error( (string) $settings['modules_subpath'] );
-				return;
+				return null;
 			}
 			$modules_subpath = $cleaned;
 		}
@@ -96,19 +102,34 @@ class SettingsRepository {
 			$cleaned = SubpathSanitizer::sanitize( $settings['docs_subpath'] );
 			if ( null === $cleaned ) {
 				$this->raise_invalid_subpath_error( (string) $settings['docs_subpath'] );
-				return;
+				return null;
 			}
 			$docs_subpath = $cleaned;
 		}
 
-		$clean = array(
+		return array(
 			'plugin_slug'          => $plugin_slug,
 			'modules_scan_enabled' => $modules_enabled,
 			'modules_subpath'      => $modules_subpath,
 			'docs_scan_enabled'    => $docs_enabled,
 			'docs_subpath'         => $docs_subpath,
 		);
+	}
 
+	/**
+	 * Persist settings after sanitising subpath inputs.
+	 *
+	 * If ANY subpath field fails validation, the entire save is short-circuited
+	 * (the option is left unchanged) and a settings error is raised so the
+	 * admin UI can display the rejection.
+	 *
+	 * @param array<string,mixed> $settings Raw settings payload.
+	 */
+	public function save( array $settings ): void {
+		$clean = $this->sanitize( $settings );
+		if ( null === $clean ) {
+			return;
+		}
 		update_option( self::OPTION_NAME, $clean );
 	}
 
