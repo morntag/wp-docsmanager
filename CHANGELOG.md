@@ -3,6 +3,17 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.6.0](https://github.com/morntag/wp-docsmanager/compare/v0.5.0...v0.6.0) (2026-04-20)
+
+### Features
+
+* **multisite:** restrict plugin to main site only on network installs ([2f71b97](https://github.com/morntag/wp-docsmanager/commit/2f71b97ebf73256db290afd19ac3a6f3c4baad72))
+
+### Bug Fixes
+
+* **scanner:** add missing path separator between modules dir and module name ([720d608](https://github.com/morntag/wp-docsmanager/commit/720d608a215830a6dc475f6e4355516ecd09e752))
+* **settings:** prevent sanitize-callback recursion that caused 502 on save ([2979a70](https://github.com/morntag/wp-docsmanager/commit/2979a70aa2f230da72280af27c5194e90fc3d297))
+
 ## [0.5.0](https://github.com/morntag/wp-docsmanager/compare/v0.4.1...v0.5.0) (2026-04-17)
 
 ### Features
