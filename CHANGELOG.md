@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.7.0](https://github.com/morntag/wp-docsmanager/compare/v0.6.0...v0.7.0) (2026-04-20)
+
+### Features
+
+* **editor:** add markdown paste parsing and visual/markdown tabs ([d11815f](https://github.com/morntag/wp-docsmanager/commit/d11815fc7758406e92bf24433de43243287eed89))
+
 ## [0.6.0](https://github.com/morntag/wp-docsmanager/compare/v0.5.0...v0.6.0) (2026-04-20)
 
 ### Features
