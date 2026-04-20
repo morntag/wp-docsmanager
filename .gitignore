@@ -4,3 +4,6 @@
 *.log
 .phpunit.cache/
 implement-learnings.md
+.env
+.env.local
+.env.*.local
