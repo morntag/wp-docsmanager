@@ -66,7 +66,7 @@ class FileScanner {
 				continue;
 			}
 
-			$readme_path = $this->modules_dir . $module . '/README.md';
+			$readme_path = rtrim( $this->modules_dir, '/' ) . '/' . $module . '/README.md';
 
 			if ( file_exists( $readme_path ) ) {
 				// phpcs:ignore WordPress.WP.AlternativeFunctions.file_get_contents_file_get_contents -- Reading local file, not remote URL.
