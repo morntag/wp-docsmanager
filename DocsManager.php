@@ -292,7 +292,11 @@ class DocsManager extends Module {
 
 		// Process form data.
 		$post_title   = isset( $_POST['title'] ) ? sanitize_text_field( wp_unslash( $_POST['title'] ) ) : '';
-		$post_content = isset( $_POST['content'] ) ? wp_kses_post( wp_unslash( $_POST['content'] ) ) : '';
+		// Content is stored as raw Markdown. Do not run wp_kses_post() here:
+		// its tag splitter HTML-encodes stray `>` characters, which would
+		// mangle blockquote syntax (`> text` -> `&gt; text`). XSS defense is
+		// applied at render time via wp_kses_post() on the parsed HTML output.
+		$post_content = isset( $_POST['content'] ) ? wp_unslash( $_POST['content'] ) : ''; // phpcs:ignore WordPress.Security.ValidatedSanitizedInput.InputNotSanitized -- markdown stored raw, sanitised on render.
 		$post_parent  = isset( $_POST['parent_id'] ) ? absint( $_POST['parent_id'] ) : 0;
 		$post_order   = isset( $_POST['menu_order'] ) ? absint( $_POST['menu_order'] ) : 0;
 

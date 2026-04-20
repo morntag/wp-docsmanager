@@ -289,6 +289,13 @@
 	font-size: 16px;
 }
 
+.mcc-docs-content-body blockquote {
+	border-left: 4px solid #0073aa;
+	margin: 1em 0;
+	padding-left: 16px;
+	color: #666;
+}
+
 .mcc-docs-content-body pre {
 	background: #f5f5f5;
 	border: 1px solid #ddd;
