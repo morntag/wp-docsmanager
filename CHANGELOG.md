@@ -3,6 +3,16 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.8.0](https://github.com/morntag/wp-docsmanager/compare/v0.7.0...v0.8.0) (2026-04-20)
+
+### Features
+
+* **editor:** sticky toolbar with save/cancel/delete actions ([197552e](https://github.com/morntag/wp-docsmanager/commit/197552e1400c238553eb62c54ca345b09c48dfb6))
+
+### Bug Fixes
+
+* **editor:** preserve blockquote markdown on save and style in viewer ([bd263c3](https://github.com/morntag/wp-docsmanager/commit/bd263c3f43cef2dcd65a812de419b240c86fca46))
+
 ## [0.7.0](https://github.com/morntag/wp-docsmanager/compare/v0.6.0...v0.7.0) (2026-04-20)
 
 ### Features
