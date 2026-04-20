@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 
+## [0.8.1](https://github.com/morntag/wp-docsmanager/compare/v0.8.0...v0.8.1) (2026-04-20)
+
+### Bug Fixes
+
+* **release:** rebuild zip with trimmed exclude list ([4b5187c](https://github.com/morntag/wp-docsmanager/commit/4b5187ce37dd8824fb4082124284cac47a420c66))
+
 ## [0.8.0](https://github.com/morntag/wp-docsmanager/compare/v0.7.0...v0.8.0) (2026-04-20)
 
 ### Features
