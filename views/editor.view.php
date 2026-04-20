@@ -160,7 +160,7 @@ wp_enqueue_script(
 
 		<div class="mcc-docs-editor-actions">
 			<button type="submit" class="button button-primary">
-				<?php echo $edit_post_id ? esc_html__( 'Update Document', 'morntag-docs' ) : esc_html__( 'Create Document', 'morntag-docs' ); ?>
+				<?php esc_html_e( 'Save', 'morntag-docs' ); ?>
 			</button>
 			<a href="<?php echo esc_url( admin_url( 'admin.php?page=mcc-documentation' ) ); ?>" class="button">
 				<?php esc_html_e( 'Cancel', 'morntag-docs' ); ?>
@@ -210,6 +210,12 @@ document.addEventListener('DOMContentLoaded', function() {
 				console.log('MCC Docs: Autosaved');
 			}
 		});
+
+		var toolbar = container.querySelector('.mcc-docs-editor-toolbar');
+		var actions = document.querySelector('.mcc-docs-editor > form > .mcc-docs-editor-actions');
+		if (toolbar && actions) {
+			toolbar.appendChild(actions);
+		}
 	}
 });
 </script>

@@ -491,6 +491,15 @@ mark {
 	background: #f9f9f9;
 	border-bottom: 1px solid #ddd;
 	border-radius: 4px 4px 0 0;
+	position: sticky;
+	top: 32px;
+	z-index: 10;
+}
+
+@media screen and (max-width: 782px) {
+	.mcc-docs-editor-toolbar {
+		top: 46px;
+	}
 }
 
 .mcc-docs-editor-toolbar-btn {
@@ -532,6 +541,13 @@ mark {
 	height: 20px;
 	background: #ddd;
 	margin: 0 4px;
+}
+
+.mcc-docs-editor-toolbar .mcc-docs-editor-actions {
+	margin-left: auto;
+	display: flex;
+	align-items: center;
+	gap: 6px;
 }
 
 /* Editor Content Area */
