@@ -5,51 +5,41 @@ namespace Morntag\WpDocsManager\Tests\Unit;
 use PHPUnit\Framework\TestCase;
 
 /**
- * Phase 3 AC #5: a repo-root exclude list ensures rsync/zip never copy dev
- * tooling into the release archive. The plan calls the file `.zipexclude`;
- * the plugin-header ecosystem also knows `.distignore`. Either filename is
- * accepted so long as one exists and carries the required entries.
+ * Guards the release-ZIP exclude list. Exclusions live inline in the
+ * `Package release ZIP` step of `.github/workflows/release.yml` (rather
+ * than a committed `.zipexclude` file) because past runs picked up a
+ * stale on-disk file and shipped bloat.
  */
 class ZipExcludeTest extends TestCase {
 
 	private string $contents;
 
 	protected function setUp(): void {
-		$root = dirname( __DIR__, 2 );
+		$workflow = dirname( __DIR__, 2 ) . '/.github/workflows/release.yml';
 
-		$candidates = array(
-			$root . '/.zipexclude',
-			$root . '/.distignore',
+		$this->assertFileExists(
+			$workflow,
+			'Release workflow is missing — inline exclude list cannot be validated.'
 		);
 
-		$found = null;
-		foreach ( $candidates as $path ) {
-			if ( file_exists( $path ) ) {
-				$found = $path;
-				break;
-			}
-		}
+		$this->contents = (string) file_get_contents( $workflow );
 
-		$this->assertNotNull(
-			$found,
-			'Phase 3 requires a repo-root zip-exclude list file (.zipexclude per the plan, or .distignore). Neither was found.'
+		$this->assertStringContainsString(
+			".release-excludes <<'EOF'",
+			$this->contents,
+			'Release workflow must contain an inline exclude heredoc for the ZIP packaging step.'
 		);
-
-		$this->contents = (string) file_get_contents( (string) $found );
 	}
 
 	/**
 	 * @dataProvider required_exclude_entry_provider
 	 */
-	public function test_zip_exclude_file_contains_entry( string $entry ): void {
-		// Match on word-ish boundary so `tests` doesn't accidentally match
-		// inside a longer token. Rsync/zip ignore files are line-based, so
-		// we look for the entry either on its own line or with trailing slash.
+	public function test_release_workflow_excludes_entry( string $entry ): void {
 		$pattern = '/(^|\n)\s*' . preg_quote( $entry, '/' ) . '\/?\s*(\n|$)/';
 		$this->assertMatchesRegularExpression(
 			$pattern,
 			$this->contents,
-			"Zip-exclude file must list '{$entry}' so it is stripped from the release ZIP."
+			"Release workflow inline exclude list must list '{$entry}' so it is stripped from the release ZIP."
 		);
 	}
 
@@ -67,6 +57,8 @@ class ZipExcludeTest extends TestCase {
 			'phpstan.neon',
 			'package.json',
 			'package-lock.json',
+			'composer.json',
+			'composer.lock',
 			'CLAUDE.md',
 			'.claude',
 			'lefthook.yml',
@@ -75,6 +67,7 @@ class ZipExcludeTest extends TestCase {
 			'CHANGELOG.md',
 			'plans',
 			'.env',
+			'vendor/bin',
 		);
 
 		$provider = array();
